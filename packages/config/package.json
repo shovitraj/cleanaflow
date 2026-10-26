@@ -1,0 +1,14 @@
+{
+  "name": "@cleanaglow/config",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.js",
+  "files": [
+    "tsconfig.base.json",
+    "tailwind.config.ts",
+    "eslint.config.js"
+  ],
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}
