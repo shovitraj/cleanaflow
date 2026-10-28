@@ -83,4 +83,21 @@ export const DisputeStatus = {
 } as const;
 export type DisputeStatus = (typeof DisputeStatus)[keyof typeof DisputeStatus];
 
+export const TaskStatus = {
+  OPEN: "OPEN",
+  ASSIGNED: "ASSIGNED",
+  IN_PROGRESS: "IN_PROGRESS",
+  COMPLETED: "COMPLETED",
+  CANCELED: "CANCELED"
+} as const;
+export type TaskStatus = (typeof TaskStatus)[keyof typeof TaskStatus];
+
+export const TaskOfferStatus = {
+  PENDING: "PENDING",
+  ACCEPTED: "ACCEPTED",
+  DECLINED: "DECLINED",
+  WITHDRAWN: "WITHDRAWN"
+} as const;
+export type TaskOfferStatus = (typeof TaskOfferStatus)[keyof typeof TaskOfferStatus];
+
 export * from "@prisma/client";

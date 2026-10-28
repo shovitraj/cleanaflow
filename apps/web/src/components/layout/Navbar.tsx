@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
-import { Sparkles, Calendar, User, LogOut, MessageSquare, Briefcase, Bell } from "lucide-react";
+import { Sparkles, Calendar, User, LogOut, MessageSquare, Briefcase, Bell, ListChecks } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export function Navbar() {
@@ -38,9 +38,16 @@ export function Navbar() {
         </Link>
 
         <nav className="flex items-center gap-3 md:gap-6">
-          <Link href="/book" className="text-sm font-semibold text-slate-600 hover:text-teal-600 transition hidden sm:inline-block">
-            Book a Clean
-          </Link>
+          {!isCleaner && (
+            <>
+              <Link href="/taskers" className="text-sm font-semibold text-slate-600 hover:text-teal-600 transition hidden sm:inline-block">
+                Browse Taskers
+              </Link>
+              <Link href="/book" className="text-sm font-semibold text-slate-600 hover:text-teal-600 transition hidden sm:inline-block">
+                Book a Clean
+              </Link>
+            </>
+          )}
 
           {isAuthenticated ? (
             <div className="flex items-center gap-3">
@@ -52,6 +59,13 @@ export function Navbar() {
                   >
                     <Calendar className="w-4 h-4" />
                     <span>Dashboard</span>
+                  </Link>
+                  <Link
+                    href="/dashboard/tasks"
+                    className="flex items-center gap-1.5 text-sm font-medium text-slate-700 hover:text-teal-600 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition"
+                  >
+                    <ListChecks className="w-4 h-4" />
+                    <span>My Tasks</span>
                   </Link>
                   <Link
                     href="/dashboard/messages"
@@ -71,6 +85,20 @@ export function Navbar() {
                   >
                     <Briefcase className="w-4 h-4" />
                     <span>Job Feed</span>
+                  </Link>
+                  <Link
+                    href="/pro/tasks"
+                    className="flex items-center gap-1.5 text-sm font-medium text-slate-700 hover:text-teal-600 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition"
+                  >
+                    <ListChecks className="w-4 h-4" />
+                    <span>Tasks</span>
+                  </Link>
+                  <Link
+                    href="/pro/profile"
+                    className="flex items-center gap-1.5 text-sm font-medium text-slate-700 hover:text-teal-600 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition"
+                  >
+                    <User className="w-4 h-4" />
+                    <span>Profile</span>
                   </Link>
                   <Link
                     href="/pro/calendar"

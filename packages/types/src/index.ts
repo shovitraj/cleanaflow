@@ -1,6 +1,7 @@
 export * from "./pricing";
 export * from "./notifications";
 export * from "./email";
+export * from "./tasks";
 
 export type UserRole = "CUSTOMER" | "CLEANER" | "ADMIN";
 export type SubscriptionPlan = "WEEKLY" | "BIWEEKLY" | "MONTHLY";

@@ -15,6 +15,7 @@ import {
   Clock,
   HeartHandshake
 } from "lucide-react";
+import { TASK_CATEGORIES, TASK_CATEGORY_KEYS } from "@cleanaglow/types";
 
 export default function HomePage() {
   const router = useRouter();
@@ -97,6 +98,37 @@ export default function HomePage() {
                 <span>Satisfaction Guaranteed</span>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* On-demand Tasks */}
+      <section className="py-20 bg-slate-50 border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <h2 className="text-3xl font-bold text-slate-900">Need a hand with something else?</h2>
+            <p className="mt-3 text-slate-600">
+              Furniture assembly, mounting, moving help, repairs and more. Pick a Tasker or post a task and get offers.
+            </p>
+          </div>
+          <div className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto">
+            {TASK_CATEGORY_KEYS.map((k) => (
+              <Link
+                key={k}
+                href={`/taskers?category=${k}`}
+                className="px-4 py-2 rounded-full bg-white border border-slate-200 text-sm font-medium text-slate-700 hover:border-teal-400 hover:text-teal-700 transition"
+              >
+                {TASK_CATEGORIES[k].label}
+              </Link>
+            ))}
+          </div>
+          <div className="mt-8 flex justify-center gap-3">
+            <Link href="/taskers" className="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-3 rounded-xl transition">
+              Browse Taskers
+            </Link>
+            <Link href="/dashboard/tasks/new" className="bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-semibold px-6 py-3 rounded-xl transition">
+              Post a task
+            </Link>
           </div>
         </div>
       </section>

@@ -19,6 +19,9 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  customerTasks    Task[]           @relation("CustomerTasks")
+  taskerTasks      Task[]           @relation("TaskerTasks")
+  taskOffers       TaskOffer[]
   accounts         Account[]
   sessions         Session[]
   addresses        Address[]
@@ -107,6 +110,13 @@ model CleanerProfile {
   rating                 Float    @default(5.0)
   reviewCount            Int      @default(0)
   isActive               Boolean  @default(true)
+  headline               String?
+  skills                 String   @default("HOME_CLEANING")
+  hourlyRateCents        Int      @default(4500)
+  hasVehicle             Boolean  @default(false)
+  yearsExperience        Int      @default(0)
+  tasksCompleted         Int      @default(0)
+  isElite                Boolean  @default(false)
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 
@@ -188,7 +198,8 @@ model Booking {
 
 model Payment {
   id                    String   @id @default(cuid())
-  bookingId             String
+  bookingId             String?
+  taskId                String?
   stripePaymentIntentId String   @unique
   stripeChargeId        String?
   amountCents           Int
@@ -197,9 +208,11 @@ model Payment {
   refundAmountCents     Int?
   createdAt             DateTime @default(now())
 
-  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  booking Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  task    Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   @@index([bookingId])
+  @@index([taskId])
   @@index([stripePaymentIntentId])
 }
 
@@ -207,6 +220,7 @@ model Payout {
   id               String    @id @default(cuid())
   cleanerId        String
   bookingId        String?
+  taskId           String?
   stripeTransferId String    @unique
   amountCents      Int
   status           String    @default("PENDING")
@@ -215,26 +229,90 @@ model Payout {
 
   cleaner User     @relation(fields: [cleanerId], references: [id])
   booking Booking? @relation(fields: [bookingId], references: [id])
+  task    Task?    @relation(fields: [taskId], references: [id])
 
   @@index([cleanerId])
   @@index([bookingId])
+  @@index([taskId])
 }
 
 model Review {
   id        String   @id @default(cuid())
-  bookingId String   @unique
+  bookingId String?  @unique
+  taskId    String?  @unique
   authorId  String
   targetId  String
   rating    Int
   body      String
   createdAt DateTime @default(now())
 
-  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  author  User    @relation("GivenReviews", fields: [authorId], references: [id])
-  target  User    @relation("ReceivedReviews", fields: [targetId], references: [id])
+  booking Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  task    Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  author  User     @relation("GivenReviews", fields: [authorId], references: [id])
+  target  User     @relation("ReceivedReviews", fields: [targetId], references: [id])
 
   @@index([authorId])
   @@index([targetId])
+}
+
+// On-demand tasks (TaskRabbit-style). Taskers are Users with a CleanerProfile.
+// status: OPEN | ASSIGNED | IN_PROGRESS | COMPLETED | CANCELED
+model Task {
+  id               String    @id @default(cuid())
+  customerId       String
+  taskerId         String?
+  invitedTaskerId  String?
+  category         String
+  title            String
+  description      String
+  street           String
+  city             String
+  state            String
+  zip              String
+  scheduledAt      DateTime
+  flexibleTiming   Boolean   @default(false)
+  estimatedHours   Float     @default(1)
+  actualHours      Float?
+  hourlyRateCents  Int?
+  status           String    @default("OPEN")
+  subtotalCents    Int?
+  trustFeeCents    Int?
+  tipCents         Int       @default(0)
+  taskerPayoutCents Int?
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  customer User        @relation("CustomerTasks", fields: [customerId], references: [id])
+  tasker   User?       @relation("TaskerTasks", fields: [taskerId], references: [id])
+  offers   TaskOffer[]
+  payments Payment[]
+  payouts  Payout[]
+  review   Review?
+
+  @@index([customerId])
+  @@index([taskerId])
+  @@index([status])
+  @@index([category])
+  @@index([zip])
+}
+
+// status: PENDING | ACCEPTED | DECLINED | WITHDRAWN
+model TaskOffer {
+  id              String   @id @default(cuid())
+  taskId          String
+  taskerId        String
+  hourlyRateCents Int
+  message         String
+  status          String   @default("PENDING")
+  createdAt       DateTime @default(now())
+
+  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  tasker User @relation(fields: [taskerId], references: [id])
+
+  @@unique([taskId, taskerId])
+  @@index([taskId])
+  @@index([taskerId])
 }
 
 model Conversation {

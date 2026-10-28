@@ -7,7 +7,12 @@ export type NotificationType =
   | "PAYMENT_FAILED"
   | "PAYOUT_SENT"
   | "DISPUTE_UPDATED"
-  | "NEW_MESSAGE";
+  | "NEW_MESSAGE"
+  | "NEW_TASK_OFFER"
+  | "TASK_OFFER_ACCEPTED"
+  | "TASK_STATUS_UPDATED"
+  | "TASK_COMPLETED"
+  | "TASK_CANCELED";
 
 export interface NotificationPayload {
   userId: string;

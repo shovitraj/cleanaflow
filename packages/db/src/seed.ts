@@ -8,12 +8,14 @@ async function main() {
 
   // Clean existing records in reverse dependency order
   await prisma.notification.deleteMany();
+  await prisma.taskOffer.deleteMany();
   await prisma.dispute.deleteMany();
   await prisma.review.deleteMany();
   await prisma.message.deleteMany();
   await prisma.conversation.deleteMany();
   await prisma.payout.deleteMany();
   await prisma.payment.deleteMany();
+  await prisma.task.deleteMany();
   await prisma.booking.deleteMany();
   await prisma.subscription.deleteMany();
   await prisma.homeProfile.deleteMany();
@@ -70,11 +72,11 @@ async function main() {
 
   // 5. Cleaners (5 pros)
   const cleanerData = [
-    { name: "Maria Santos", email: "maria@cleanaglow.com", bio: "10+ years residential cleaning experience. Detail-oriented and pet-friendly.", zips: ["10001", "10002", "10003"], rating: 4.95, reviews: 48 },
-    { name: "Elena Rostova", email: "elena@cleanaglow.com", bio: "Eco-friendly products specialist. Deep clean expert.", zips: ["10001", "10003"], rating: 4.88, reviews: 32 },
-    { name: "David Kim", email: "david@cleanaglow.com", bio: "Fast, reliable, and thorough home cleaner.", zips: ["94102", "94103"], rating: 4.92, reviews: 29 },
-    { name: "Aisha Johnson", email: "aisha@cleanaglow.com", bio: "Passionate about sparkling homes and happy customers.", zips: ["10002", "10003"], rating: 5.0, reviews: 15 },
-    { name: "Carlos Mendez", email: "carlos@cleanaglow.com", bio: "Professional move-in/move-out and recurring cleaning pro.", zips: ["90210"], rating: 4.79, reviews: 22 }
+    { name: "Maria Santos", email: "maria@cleanaglow.com", bio: "10+ years residential cleaning experience. Detail-oriented and pet-friendly.", zips: ["10001", "10002", "10003"], rating: 4.95, reviews: 48, headline: "Spotless homes, every time", skills: "HOME_CLEANING, HOME_ORGANIZING", rate: 4500, vehicle: false, years: 10, tasks: 120, elite: true },
+    { name: "Elena Rostova", email: "elena@cleanaglow.com", bio: "Eco-friendly products specialist. Deep clean expert.", zips: ["10001", "10003"], rating: 4.88, reviews: 32, headline: "Eco-friendly deep cleaning", skills: "HOME_CLEANING, PAINTING", rate: 4200, vehicle: false, years: 6, tasks: 70, elite: false },
+    { name: "David Kim", email: "david@cleanaglow.com", bio: "Fast, reliable, and thorough. Tools and truck included.", zips: ["94102", "94103"], rating: 4.92, reviews: 29, headline: "Assembly, mounting and moving muscle", skills: "HOME_CLEANING, FURNITURE_ASSEMBLY, MOUNTING, MOVING_HELP", rate: 5500, vehicle: true, years: 8, tasks: 95, elite: true },
+    { name: "Aisha Johnson", email: "aisha@cleanaglow.com", bio: "Passionate about sparkling homes and happy customers.", zips: ["10002", "10003"], rating: 5.0, reviews: 15, headline: "Handy with a drill", skills: "FURNITURE_ASSEMBLY, MOUNTING, HOME_REPAIRS", rate: 5000, vehicle: false, years: 4, tasks: 38, elite: false },
+    { name: "Carlos Mendez", email: "carlos@cleanaglow.com", bio: "Professional move-in/move-out and recurring cleaning pro.", zips: ["90210"], rating: 4.79, reviews: 22, headline: "Moves, yard work and deliveries", skills: "HOME_CLEANING, MOVING_HELP, YARD_WORK, DELIVERY", rate: 4800, vehicle: true, years: 5, tasks: 51, elite: false }
   ];
 
   const cleaners = [];
@@ -92,6 +94,13 @@ async function main() {
             rating: c.rating,
             reviewCount: c.reviews,
             serviceZipCodes: c.zips.join(", "),
+            headline: c.headline,
+            skills: c.skills,
+            hourlyRateCents: c.rate,
+            hasVehicle: c.vehicle,
+            yearsExperience: c.years,
+            tasksCompleted: c.tasks,
+            isElite: c.elite,
             onboardingComplete: true,
             stripeConnectAccountId: `acct_mock_${c.name.toLowerCase().replace(" ", "_")}`
           }
@@ -369,6 +378,35 @@ async function main() {
       { conversationId: conv.id, senderId: customers[0].id, body: "Hi Maria! Just checking if 10am still works for tomorrow?", createdAt: new Date(now - 3600000) },
       { conversationId: conv.id, senderId: cleaners[0].id, body: "Hi Sarah! Yes, 10am is perfect. See you tomorrow!", createdAt: new Date(now - 1800000) }
     ]
+  });
+
+  // 10. Sample on-demand tasks
+  const addr = customers[0].addresses[0];
+  const aisha = cleaners[3];
+  const openTask = await prisma.task.create({
+    data: {
+      customerId: customers[0].id,
+      category: "FURNITURE_ASSEMBLY",
+      title: "Assemble a 6-drawer dresser and a bed frame",
+      description: "Both are IKEA. Boxes are in the living room; I have basic tools.",
+      street: addr.street, city: addr.city, state: addr.state, zip: addr.zip,
+      scheduledAt: new Date(now + 3 * DAY),
+      estimatedHours: 3
+    }
+  });
+  await prisma.taskOffer.create({
+    data: { taskId: openTask.id, taskerId: aisha.id, hourlyRateCents: 5000, message: "I've assembled hundreds of IKEA pieces and bring my own drill. Happy to do both in one visit." }
+  });
+  await prisma.task.create({
+    data: {
+      customerId: customers[1].id,
+      category: "MOUNTING",
+      title: "Mount a 55\" TV on drywall",
+      description: "Wall mount bracket already purchased.",
+      street: customers[1].addresses[0].street, city: "San Francisco", state: "CA", zip: "94102",
+      scheduledAt: new Date(now + 2 * DAY),
+      estimatedHours: 1.5
+    }
   });
 
   console.log("Database seeded successfully!");

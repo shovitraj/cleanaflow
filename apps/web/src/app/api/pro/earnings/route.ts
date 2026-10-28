@@ -45,7 +45,7 @@ export async function GET(req: Request) {
         totalEarningsCents,
         thisWeekEarningsCents,
         thisMonthEarningsCents,
-        completedJobsCount: paidPayouts.length
+        completedJobsCount: paidPayouts.filter((p) => !p.stripeTransferId.startsWith("tr_tip_")).length
       },
       payouts: cleaner.payouts,
       profile: cleaner.cleanerProfile
